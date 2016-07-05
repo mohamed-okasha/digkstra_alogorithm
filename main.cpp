@@ -10,147 +10,97 @@
 #include <string>
 #include <cstring>
 #include <malloc.h>
+#include <iomanip>
+
+#include "map_nodes.h"
+
 using namespace std;
 
-class Node {
+std::vector<Node *> sptSet;
+std::vector<Node *> Spt;
 
-//private:
+bool exist_in_spt(Node *node);
+bool traverse_map(Node *node);
+void show_table(Node *source);
 
-//private:
-	//static vector<Node *>::iterator s_next;
-public:
+int find_shortest_path_for(Node *node, Node *dis_node) {
 
-	class row {
+	Node *u;
+	Node *source = node;
 
-	public:
-		Node * d_node; // distination
-		string v_path; // via path
-		int distance = 100000; // set initially infinite
-		bool visited = false;
+	std::vector<Node *>::iterator i;
+	std::list<Node *>::iterator ad;
 
-	};
+	int min_dis = 0;
 
-	string name;
+	source->r_distance = 0;
+	source->addEntry(source, NULL, NULL, 1);
 
-	vector<Node *> n_nodes; // nea
-	list<row *> table;
+	traverse_map(node);
 
-	Node(string name) {
-		this->name.append(name);
+	u = node;
+	Spt.push_back(u);
+	while (Spt.size() < sptSet.size()) {
+		cout << u->name << endl;
 
-		row *first_row = new row;
-		first_row->v_path = "-";
-		table.push_front(first_row);
+		for (ad = u->n_nodes.begin(); ad != u->n_nodes.end(); ad++) {
 
-	}
+			if ((*ad)->r_distance > (infinite - 1)) { // impossibale distance if visited
 
-	//vector<Node *>::iterator  next_node=n_nodes.begin();
+				(*ad)->r_distance = u->r_distance
+						+ u->getDistanceto((*ad)->name);
+				//	cout<<(*ad)->d_node->name<<" rel dist:"<<(*ad)->d_node->r_distance<<endl;
+				Node::row *r = source->getEntry(*ad);
 
-};
+				if (r == NULL && source != *ad) {
+					cout << "not exist" << endl;
+					r = new Node::row;
+					source->addEntry(r);
+				}
+				r->d_node = *ad;
+				r->distance = (*ad)->r_distance;
+				r->v_path = u;
 
-vector<Node *> sptSet;
+				std::cout << "new entry:" << r->d_node->name << ":"
+						<< r->v_path->name << ":" << r->distance << endl;
 
-/*Node * add_next_node(Node * cNode,string Name){
-
- Node *new_node= new Node(Name);
-
- cNode->n_nodes.push_back(new_node);
-
- //cout<<(*cNode->next_node)->name;
- return (new_node);
- }
- */
-
-bool traverse_map(Node *node) {
-	vector<Node *>::iterator i;
-	list<Node::row *>::iterator r;
-
-	if (!(*node->table.begin())->visited)
-		return (true);
-
-	for (i = node->n_nodes.begin(); i != (node->n_nodes).end(); ++i) {
-
-		traverse_map((*i));
-	}
-
-	return false;
-}
-
-bool exist_in_spt(Node *node, vector<Node *> spt) {
-
-	vector<Node *>::iterator i;
-
-	for (i = spt.begin(); i != spt.end(); i++) {
-
-		if (*i == node) {
-
-			//cout<<(*i)->name<<"::"<<(*i)<<"==";
-			//cout<<node->name<<"::"<<node<<"endl";
-			return (true);
-		}
-
-	}
-
-	return (false);
-}
-Node::row * get_min(Node *node) {
-
-	vector<Node *>::iterator i;
-	list<Node::row *>::iterator r;
-
-	static int min_distance = 10000;
-	Node::row *min_node = NULL;
-//cout<<"node::"<< node->name;
-//cout<<endl<<"Table::"<<endl;
-
-	if (!exist_in_spt(node, sptSet)) {
-		//	cout<<node->name;
-		// skip first row contain information about itself
-		for (r = node->table.begin(), ++r; r != (node->table).end(); ++r) {
-			//cout<<node->name<< "->"<<(*r)->d_name<<"::"<<(*r)->distance<<endl;
-
-			if ((*r)->distance < min_distance) {
-
-				min_distance = (*r)->distance;
-				min_node = (*r);
-				Node::row *new_row = new Node::row;
-
-				// node->table.push_back(new_row);
 			}
 
-//	if ( node->name.compare((*r)->v_path)==0){ // it's a neighbor node
-			//cout<<node->name.c_str();
-// }
-
 		}
 
-	}
-
-	for (i = node->n_nodes.begin(); i != (node->n_nodes).end(); ++i) {
-		cout << (*i)->name;
-		get_min((*i));
-	}
-	cout << endl;
-
-	return (min_node);
-
-}
-int find_shortest_path_for(Node *node) {
-
-	Node::row *u;
-
-	while (u = get_min(node)) {
 		u->visited = true;
-		sptSet.push_back(u->d_node);
-		cout << u->d_node->name;
-		//cout<<endl;
+
+		bool initial = false;
+
+		// select node with not visited with minimum relative distance
+		for (i = sptSet.begin(); i != sptSet.end(); i++) {
+
+			if ((*i)->visited == false) {
+// set initial value to minimum distance
+				if (!initial && (*i)->r_distance < (infinite - 1)) {
+					min_dis = (*i)->r_distance;
+					initial = true;
+				}
+
+				if (min_dis >= (*i)->r_distance) {
+
+					min_dis = (*i)->r_distance;
+					u = *i;
+
+					//		cout<<"min "<<min_dis<<"  vai path:"<<u->name<<endl;
+				}
+
+			}
+
+		}
+		Spt.push_back(u);
 
 	}
-	//cout<<"end";
 
 	return (0);
 
 }
+
 int main() {
 
 	Node * A = new Node("A");
@@ -162,47 +112,87 @@ int main() {
 	Node *D = new Node("D");
 	Node *E = new Node("E");
 
-	Node::row *rAB = new Node::row;
-	Node::row *rAC = new Node::row;
-	Node::row *rBE = new Node::row;
-	Node::row *rCE = new Node::row;
-	Node::row *rBD = new Node::row;
+	//Node::row *rAB = new Node::row;
+	//Node::row *rAC = new Node::row;
+	//Node::row *rBE = new Node::row;
+	//Node::row *rCE = new Node::row;
+	//Node::row *rBD = new Node::row;
 
 	// create map
 	A->n_nodes.push_back(B);
-	rAB->d_node = B;
-	rAB->distance = 5;
-	rAB->v_path = A->name.at(0);
-	(*A->table.begin())->distance = 0; // set distance path source node to zero
-	A->table.push_back(rAB);
+	A->addEntry(B, A, 5, 1);
+//	(*A->table.begin())->distance = 0; // set distance path source node to zero
 
 	A->n_nodes.push_back(C);
-	rAC->d_node = C;
-	rAC->distance = 70;
-	rAC->v_path = A->name.at(0);
-	A->table.push_back(rAC);
+	A->addEntry(C, A, 30, 1);
 
 	B->n_nodes.push_back(E);
-	rBE->d_node = E;
-	rBE->distance = 1;
-	rBE->v_path = B->name.at(0);
-	B->table.push_back(rBE);
+	B->addEntry(E, B, 10, 1);
 
 	B->n_nodes.push_back(D);
-	rBD->d_node = D;
-	rBD->distance = 6;
-	rBD->v_path = B->name.at(0);
-	B->table.push_back(rBD);
+	B->addEntry(D, B, 6, 1);
 
 	C->n_nodes.push_back(E);
-	rCE->d_node = E;
-	rCE->distance = 3;
-	rCE->v_path = C->name.at(0);
-	C->table.push_back(rCE);
+	B->addEntry(E, C, 3, 1);
 
 // find shortes path for A Node;
-	find_shortest_path_for(A);
+	find_shortest_path_for(A, C);
+	show_table(A);
 //cout<<traverse_map(A);
 
 }
 
+bool exist_in_spt(Node *node) {
+
+	vector<Node *>::iterator i;
+
+	for (i = sptSet.begin(); i != sptSet.end(); i++) {
+
+		if (*i == node) {
+			return (true);
+		}
+
+	}
+
+	return (false);
+}
+
+bool traverse_map(Node *node) {
+	std::list<Node *>::iterator i;
+	std::list<Node::row *>::iterator r;
+
+	for (i = node->n_nodes.begin(); i != (node->n_nodes).end(); ++i) {
+
+		if (!exist_in_spt(*i))
+			sptSet.push_back(*i);
+	}
+	for (i = node->n_nodes.begin(); i != node->n_nodes.end(); ++i) {
+
+		traverse_map((*i));
+	}
+
+	return (false);
+}
+
+void show_table(Node *source) {
+
+	list<Node::row *>::iterator i;
+
+	std::cout << setw(10) << "Node" << setw(10) << "Via Node" << setw(10)
+			<< "cost" << endl;
+
+	for (i = source->table.begin(); i != source->table.end(); i++) {
+		if ((*i)->d_node != NULL)
+			std::cout << setw(10) << (*i)->d_node->name;
+		else
+			std::cout << setw(10) << "-";
+
+		if ((*i)->v_path != NULL)
+			cout << setw(10) << (*i)->v_path->name;
+		else
+			std::cout << setw(10) << "-";
+
+		cout << setw(10) << (*i)->distance << endl;
+
+	}
+}
