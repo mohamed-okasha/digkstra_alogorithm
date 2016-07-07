@@ -11,6 +11,7 @@
 #include <cstring>
 #include <malloc.h>
 #include <iomanip>
+#include <stack>
 
 #include "map_nodes.h"
 
@@ -18,6 +19,7 @@ using namespace std;
 
 std::vector<Node *> sptSet;
 std::vector<Node *> Spt;
+std::stack<Node *> sSubPaths;
 
 bool exist_in_spt(Node *node);
 bool traverse_map(Node *node);
@@ -97,6 +99,21 @@ int find_shortest_path_for(Node *node, Node *dis_node) {
 
 	}
 
+	int cost = 0;
+	sSubPaths.push(dis_node);
+	u = dis_node;
+
+	while (source->getEntry(u)->distance) {
+		u = source->getEntry(u)->v_path;
+		sSubPaths.push(u);
+	}
+	std::cout << "Fall Path :";
+	while (!sSubPaths.empty()) {
+
+		std::cout << sSubPaths.top()->name;
+		sSubPaths.pop();
+	}
+
 	return (0);
 
 }
@@ -111,6 +128,8 @@ int main() {
 
 	Node *D = new Node("D");
 	Node *E = new Node("E");
+	Node *F = new Node("F");
+	Node *G = new Node("G");
 
 	//Node::row *rAB = new Node::row;
 	//Node::row *rAC = new Node::row;
@@ -120,23 +139,38 @@ int main() {
 
 	// create map
 	A->n_nodes.push_back(B);
-	A->addEntry(B, A, 5, 1);
+	A->addEntry(B, A, 4, 1);
 //	(*A->table.begin())->distance = 0; // set distance path source node to zero
 
 	A->n_nodes.push_back(C);
-	A->addEntry(C, A, 30, 1);
+	A->addEntry(C, A, 5, 1);
 
-	B->n_nodes.push_back(E);
-	B->addEntry(E, B, 10, 1);
+	B->n_nodes.push_back(F);
+	B->addEntry(F, B, 3, 1);
+
+	B->n_nodes.push_back(G);
+	B->addEntry(G, B, 1, 1);
 
 	B->n_nodes.push_back(D);
-	B->addEntry(D, B, 6, 1);
+	B->addEntry(D, B, 2, 1);
 
-	C->n_nodes.push_back(E);
-	B->addEntry(E, C, 3, 1);
+	C->n_nodes.push_back(D);
+	C->addEntry(D, C, 3, 1);
+
+	D->n_nodes.push_back(E);
+	D->addEntry(E, D, 3, 1);
+
+	D->n_nodes.push_back(G);
+	D->addEntry(G, D, 2, 1);
+
+	F->n_nodes.push_back(E);
+	F->addEntry(E, F, 7, 1);
+
+	G->n_nodes.push_back(F);
+	G->addEntry(F, G, 2, 1);
 
 // find shortes path for A Node;
-	find_shortest_path_for(A, C);
+	find_shortest_path_for(A, E);
 	show_table(A);
 //cout<<traverse_map(A);
 

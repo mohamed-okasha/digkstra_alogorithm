@@ -45,7 +45,9 @@ public:
 	int getDistanceto(std::string na);
 	int addEntry(Node * d, Node* v_p, int cost, bool dir);
 	int addEntry(Node::row * row);
+
 	row * getEntry(Node * d);
+	row * getEntry(std::string node_name);
 
 };
 
@@ -82,6 +84,17 @@ Node::row * Node::getEntry(Node * d) {
 	std::list<row *>::iterator i;
 	for (i = table.begin(); i != table.end(); i++) {
 		if ((*i)->d_node == d)
+			return (*i);
+	}
+	return (NULL);
+
+}
+
+Node::row * Node::getEntry(std::string node_name) {
+
+	std::list<row *>::iterator i;
+	for (i = table.begin(); i != table.end(); i++) {
+		if (node_name.compare((*i)->d_node->name) == 0)
 			return (*i);
 	}
 	return (NULL);
